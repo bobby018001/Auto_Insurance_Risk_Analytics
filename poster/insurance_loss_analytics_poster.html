@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Insurance Loss Analytics - Group 5</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Arial, Helvetica, sans-serif; background: #f0f4f8; width: 1100px; margin: 0 auto; }
+.poster { width: 1100px; background: #fff; box-shadow: 0 4px 24px rgba(0,0,0,.15); }
+
+/* HEADER */
+.header {
+  background: linear-gradient(135deg, #1a2744 0%, #2d4a8a 55%, #3a6fd8 100%);
+  color: #fff; padding: 28px 38px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.header h1 { font-size: 27px; font-weight: 800; line-height: 1.2; }
+.header h2 { font-size: 13.5px; font-weight: 300; opacity: .82; margin-top: 6px; }
+.header-right { text-align: right; font-size: 12.5px; line-height: 1.8; opacity: .88; min-width: 240px; }
+
+/* EXEC BAND */
+.exec-band {
+  background: #e8f0fe; border-left: 6px solid #3a6fd8;
+  padding: 13px 38px; font-size: 13px; color: #1a2744; line-height: 1.65;
+}
+
+/* SECTION LABEL */
+.sl {
+  font-size: 9.5px; font-weight: 700; letter-spacing: 1.6px;
+  text-transform: uppercase; color: #3a6fd8;
+  border-bottom: 2px solid #3a6fd8; padding-bottom: 4px; margin-bottom: 10px;
+}
+
+/* 3-COL MAIN GRID */
+.main-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; border-top: 1px solid #e2e8f0; }
+.col { padding: 18px 17px 14px; border-right: 1px solid #e2e8f0; }
+.col:last-child { border-right: none; }
+
+/* STAT STRIP */
+.stat-strip { display: flex; gap: 7px; margin-bottom: 13px; }
+.stat-item { flex: 1; background: #fff; border: 1px solid #e2e8f0; border-radius: 7px; padding: 9px 6px; text-align: center; }
+.stat-num { font-size: 19px; font-weight: 800; color: #1a2744; }
+.stat-lab { font-size: 9.5px; color: #64748b; margin-top: 2px; line-height: 1.3; }
+
+/* CHALLENGE ITEMS */
+.ci { display: flex; gap: 8px; align-items: flex-start; margin-bottom: 8px; }
+.ci-icon { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }
+.ci-text { font-size: 11.5px; line-height: 1.45; color: #334155; }
+
+/* CARD */
+.card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 11px 13px; margin-bottom: 11px; font-size: 11.5px; color: #334155; line-height: 1.7; }
+.mono { font-family: 'Courier New', monospace; background: #f1f5f9; padding: 8px 10px; border-radius: 6px; font-size: 11px; line-height: 1.8; margin-bottom: 6px; }
+
+/* DONUT */
+.donut-wrap { display: flex; align-items: center; gap: 12px; margin: 8px 0 13px; }
+.donut { width: 70px; height: 70px; border-radius: 50%; background: conic-gradient(#e8593c 0deg 40.32deg, #1d9e75 40.32deg 360deg); flex-shrink: 0; position: relative; }
+.donut::after { content: ''; position: absolute; inset: 16px; background: #f8fafc; border-radius: 50%; }
+.donut-legend { font-size: 11px; line-height: 1.9; }
+
+/* FLOW */
+.flow { display: flex; align-items: center; gap: 0; margin: 8px 0 13px; }
+.flow-step { flex: 1; background: #f1f5f9; border: 1px solid #e2e8f0; padding: 7px 4px; text-align: center; position: relative; }
+.flow-step:not(:last-child)::after { content: '→'; position: absolute; right: -9px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 12px; z-index: 1; }
+.fs-title { font-size: 9px; font-weight: 700; color: #1a2744; }
+.fs-body { font-size: 8.5px; color: #64748b; line-height: 1.35; }
+
+/* TAG */
+.tag { display: inline-block; background: #dbeafe; color: #1e40af; border-radius: 3px; padding: 1px 5px; font-size: 9.5px; font-weight: 700; margin-right: 2px; margin-bottom: 2px; }
+
+/* MODEL TABLE */
+.mtable { width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 7px; }
+.mtable th { background: #1a2744; color: #fff; padding: 6px 7px; text-align: left; font-size: 10px; }
+.mtable td { padding: 5px 7px; border-bottom: 1px solid #e2e8f0; color: #334155; vertical-align: middle; }
+.mtable tr:nth-child(even) td { background: #f8fafc; }
+.winner { color: #15803d; font-weight: 700; }
+.mb { display: inline-block; background: #dbeafe; color: #1e40af; border-radius: 3px; padding: 1px 5px; font-size: 10px; font-weight: 700; }
+.mg { display: inline-block; background: #dcfce7; color: #15803d; border-radius: 3px; padding: 1px 5px; font-size: 10px; font-weight: 700; }
+.mr { display: inline-block; background: #fee2e2; color: #b91c1c; border-radius: 3px; padding: 1px 5px; font-size: 10px; font-weight: 700; }
+
+/* PERF GRID */
+.perf-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 7px; margin-bottom: 13px; }
+.perf-card { background: linear-gradient(135deg, #1a2744, #2d4a8a); color: white; border-radius: 8px; padding: 12px 8px; text-align: center; }
+.perf-value { font-size: 20px; font-weight: 800; line-height: 1; }
+.perf-label { font-size: 10px; opacity: .8; margin-top: 4px; line-height: 1.35; }
+
+/* INSIGHT */
+.ii { display: flex; gap: 7px; align-items: flex-start; margin-bottom: 9px; }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: #e8593c; margin-top: 5px; flex-shrink: 0; }
+.it { font-size: 11.5px; line-height: 1.5; color: #334155; }
+
+/* HBAR */
+.hbar-item { margin-bottom: 7px; }
+.hbar-label { font-size: 10.5px; color: #334155; margin-bottom: 2px; display: flex; justify-content: space-between; }
+.hbar-track { background: #e2e8f0; border-radius: 3px; height: 10px; overflow: hidden; }
+
+/* WIDE ROW */
+.wide-row { border-top: 1px solid #e2e8f0; padding: 18px 17px 0; }
+.wide-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+
+/* SHAP BARS */
+.shap-bar { margin-bottom: 7px; }
+.shap-row { display: flex; justify-content: space-between; font-size: 10.5px; margin-bottom: 2px; color: #334155; }
+.shap-track { background: #e2e8f0; height: 11px; border-radius: 3px; overflow: hidden; }
+
+/* INNOV */
+.innov-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+.innov-item { background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 7px; padding: 9px 11px; }
+.innov-title { font-size: 11px; font-weight: 700; color: #0369a1; margin-bottom: 3px; }
+.innov-body { font-size: 10.5px; color: #334155; line-height: 1.42; }
+
+/* CONCLUSION */
+.conclusion { background: #e8f0fe; border-radius: 8px; padding: 11px 14px; font-size: 11.5px; color: #1a2744; line-height: 1.6; margin-top: 10px; }
+
+/* FOOTER */
+.footer { background: #1a2744; color: rgba(255,255,255,.75); padding: 12px 38px; font-size: 11px; display: flex; justify-content: space-between; margin-top: 14px; }
+</style>
+</head>
+<body>
+<div class="poster">
+
+<!-- HEADER -->
+<div class="header">
+  <div>
+    <h1>Insurance Loss Analytics:<br>Predicting Loss Cost &amp; Claim Likelihood</h1>
+    <h2>DSO 530 · Statistical &amp; Machine Learning Methods for Business · USC Marshall School of Business</h2>
+  </div>
+  <div class="header-right">
+    <strong style="font-size:14px">Group 5</strong><br>
+    Anna Cen &nbsp;·&nbsp; Tanvi Shah &nbsp;·&nbsp; Ryan Hsu<br>
+    Jessica Yue &nbsp;·&nbsp; Yanbo Zhao &nbsp;·&nbsp; Kiki Huang<br>
+    <span style="opacity:.6;font-size:11px">Spring 2026</span>
+  </div>
+</div>
+
+<!-- EXEC BAND -->
+<div class="exec-band">
+  <strong>Goal:</strong> Predict <strong>LC</strong> (Loss Cost), <strong>HALC</strong> (Historically Adjusted Loss Cost), and binary <strong>CS</strong> (Claim Status) for 13,310 test policyholders using 39,928 training auto insurance records. &nbsp;|&nbsp;
+  <strong>Evaluation:</strong> Out-of-sample MSE for LC &amp; HALC &nbsp;·&nbsp; ROC-AUC for CS. &nbsp;|&nbsp;
+  <strong>Key finding:</strong> Customer <em>behavior</em> signals dominate over demographics across all three targets.
+</div>
+
+<!-- MAIN 3-COL -->
+<div class="main-grid">
+
+  <!-- COL 1: Problem + Targets -->
+  <div class="col">
+    <div class="sl">Business Problem &amp; Challenges</div>
+    <div class="ci">
+      <div class="ci-icon" style="background:#fef9c3">⚠️</div>
+      <div class="ci-text"><strong>Adverse Selection</strong> — Mispricing causes low-risk clients to defect, leaving an unprofitable high-risk pool.</div>
+    </div>
+    <div class="ci">
+      <div class="ci-icon" style="background:#fce7f3">🎯</div>
+      <div class="ci-text"><strong>Zero Inflation (88.85%)</strong> — Gaussian regression invalid; Tweedie loss directly models compound Poisson-Gamma distribution.</div>
+    </div>
+    <div class="ci">
+      <div class="ci-icon" style="background:#ecfdf5">📊</div>
+      <div class="ci-text"><strong>Heavy Right Tail</strong> — LC ranges 0–35,191; MSE dominated by extremes — mitigated via 1st/99th percentile clipping.</div>
+    </div>
+    <div class="ci" style="margin-bottom:14px">
+      <div class="ci-icon" style="background:#eff6ff">🔒</div>
+      <div class="ci-text"><strong>Class Imbalance (11.2%)</strong> — scale_pos_weight rebalancing + ROC-AUC (threshold-free) evaluation for CS.</div>
+    </div>
+
+    <div class="sl">Target Variable Definitions</div>
+    <div class="card">
+      <div class="mono">
+        LC &nbsp;&nbsp;= X.15 / X.16 &nbsp;(if X.16 &gt; 0, else 0)<br>
+        HALC = LC × X.18 &nbsp;(if X.16 &gt; 0, else 0)<br>
+        CS &nbsp;&nbsp;= 1 if X.16 &gt; 0, else 0
+      </div>
+      <strong>Post-processing rule:</strong> CS prob &lt; 0.5 → LC = HALC = 0<br>
+      <span style="color:#94a3b8;font-size:10.5px">Enforces structural alignment between classifier and regressors. Mirrors actuarial two-part model convention.</span>
+    </div>
+
+    <div class="sl">Claim Status Distribution (n = 39,928)</div>
+    <div class="donut-wrap">
+      <div class="donut"></div>
+      <div class="donut-legend">
+        <div><span style="display:inline-block;width:9px;height:9px;background:#1d9e75;border-radius:50%;margin-right:4px;vertical-align:middle"></span>No claim &nbsp;<strong>88.85%</strong></div>
+        <div><span style="display:inline-block;width:9px;height:9px;background:#e8593c;border-radius:50%;margin-right:4px;vertical-align:middle"></span>Has claim &nbsp;<strong>11.15%</strong></div>
+        <div style="font-size:10px;color:#94a3b8;margin-top:3px">⟹ Severe imbalance requires special handling</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COL 2: Data + Models -->
+  <div class="col">
+    <div class="sl">Data Pipeline (39,928 → 33 Features)</div>
+    <div class="stat-strip">
+      <div class="stat-item"><div class="stat-num">33</div><div class="stat-lab">Final Features</div></div>
+      <div class="stat-item"><div class="stat-num">39K</div><div class="stat-lab">Training Policies</div></div>
+      <div class="stat-item"><div class="stat-num">13K</div><div class="stat-lab">Test Policies</div></div>
+      <div class="stat-item"><div class="stat-num">1</div><div class="stat-lab">Missing Column<br>(X.27)</div></div>
+    </div>
+
+    <div class="flow" style="margin-bottom:8px">
+      <div class="flow-step" style="margin-right:10px">
+        <div class="fs-title">Raw (28)</div>
+        <div class="fs-body">5 date cols<br>categorical</div>
+      </div>
+      <div class="flow-step" style="margin-right:10px">
+        <div class="fs-title">Clean</div>
+        <div class="fs-body">Impute X.27<br>Clip 1–99 pct</div>
+      </div>
+      <div class="flow-step" style="margin-right:10px">
+        <div class="fs-title">Engineer</div>
+        <div class="fs-body">+8 derived<br>features</div>
+      </div>
+      <div class="flow-step">
+        <div class="fs-title">Encode</div>
+        <div class="fs-body">OHE X.19<br>X.26, X.27</div>
+      </div>
+    </div>
+    <div style="font-size:10.5px;color:#64748b;margin-bottom:13px;line-height:1.7">
+      Key derived: <span class="tag">cancel_ratio</span><span class="tag">days_since_renewal</span><span class="tag">days_to_renewal</span><span class="tag">vehicle_age</span><span class="tag">power_to_weight</span>
+    </div>
+
+    <div class="sl">Model Benchmarks — 3-Fold Cross-Validation</div>
+    <table class="mtable">
+      <thead><tr><th>Target</th><th>Model</th><th>Validation</th></tr></thead>
+      <tbody>
+        <tr>
+          <td rowspan="4" style="font-weight:700;color:#1a2744;font-size:10px;border-right:1px solid #e2e8f0;vertical-align:middle">LC<br><span style="font-weight:400;color:#94a3b8">MSE ↓</span></td>
+          <td>XGBoost Tweedie</td><td><span class="mb">252,660</span></td>
+        </tr>
+        <tr><td>Ensemble (XGB+LGBM)</td><td><span class="mb">253,085</span></td></tr>
+        <tr><td class="winner">★ LightGBM Tweedie</td><td><span class="mg">254,710</span></td></tr>
+        <tr><td>Tweedie GLM</td><td><span class="mr">261,968</span></td></tr>
+      </tbody>
+    </table>
+    <table class="mtable">
+      <thead><tr><th>Target</th><th>Model</th><th>Validation</th></tr></thead>
+      <tbody>
+        <tr>
+          <td rowspan="3" style="font-weight:700;color:#1a2744;font-size:10px;border-right:1px solid #e2e8f0;vertical-align:middle">HALC<br><span style="font-weight:400;color:#94a3b8">MSE ↓</span></td>
+          <td class="winner">★ LightGBM Tweedie</td><td><span class="mg">996,779</span></td>
+        </tr>
+        <tr><td>Ensemble (XGB+LGBM)</td><td><span class="mb">997,579</span></td></tr>
+        <tr><td>Tweedie GLM</td><td><span class="mr">1,033,023</span></td></tr>
+      </tbody>
+    </table>
+    <table class="mtable">
+      <thead><tr><th>Target</th><th>Model</th><th>Validation</th></tr></thead>
+      <tbody>
+        <tr>
+          <td rowspan="3" style="font-weight:700;color:#1a2744;font-size:10px;border-right:1px solid #e2e8f0;vertical-align:middle">CS<br><span style="font-weight:400;color:#94a3b8">AUC ↑</span></td>
+          <td class="winner">★ XGBoost (weighted)</td><td><span class="mg">0.857</span></td>
+        </tr>
+        <tr><td>Random Forest</td><td>Below XGB</td></tr>
+        <tr><td>Logistic Regression</td><td>Below XGB</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- COL 3: Results + Insights -->
+  <div class="col">
+    <div class="sl">Final Model Performance</div>
+    <div class="perf-grid">
+      <div class="perf-card">
+        <div class="perf-value">254K</div>
+        <div class="perf-label">LC Val. MSE<br>LightGBM Tweedie</div>
+      </div>
+      <div class="perf-card">
+        <div class="perf-value">997K</div>
+        <div class="perf-label">HALC Val. MSE<br>LightGBM Tweedie</div>
+      </div>
+      <div class="perf-card">
+        <div class="perf-value">0.857</div>
+        <div class="perf-label">CS ROC-AUC<br>XGBoost Classifier</div>
+      </div>
+    </div>
+
+    <div class="sl">Key Business Insights</div>
+    <div class="ii">
+      <div class="dot"></div>
+      <div class="it"><strong>Behavior beats demographics.</strong> cancel_ratio, renewal timing, and tenure consistently outrank age, vehicle type, and premium across all three targets.</div>
+    </div>
+    <div class="ii">
+      <div class="dot"></div>
+      <div class="it"><strong>Renewal boundary effect.</strong> Claims cluster near contract renewal — signals strategic claiming or adverse selection at policy endpoints.</div>
+    </div>
+    <div class="ii">
+      <div class="dot"></div>
+      <div class="it"><strong>Loyalty reduces risk.</strong> 10+ year policyholders: ~6.1% claim rate vs. ~18.5% for first-year customers — 3× difference.</div>
+    </div>
+    <div class="ii" style="margin-bottom:13px">
+      <div class="dot"></div>
+      <div class="it"><strong>Auto-specific model.</strong> Tweedie assumptions, vehicle features, and behavioral proxies do not transfer to life insurance lines.</div>
+    </div>
+
+    <div class="sl">Claim Rate by Key Segment</div>
+    <div class="hbar-item">
+      <div class="hbar-label"><span>6+ Policies held (X.9)</span><span style="font-weight:700;color:#e8593c">32%</span></div>
+      <div class="hbar-track"><div style="width:80%;background:#e8593c;height:10px;border-radius:3px"></div></div>
+    </div>
+    <div class="hbar-item">
+      <div class="hbar-label"><span>First-Year Policyholder</span><span style="font-weight:700;color:#f59e0b">18.5%</span></div>
+      <div class="hbar-track"><div style="width:46%;background:#f59e0b;height:10px;border-radius:3px"></div></div>
+    </div>
+    <div class="hbar-item">
+      <div class="hbar-label"><span>Half-Yearly Payment (X.13)</span><span style="font-weight:700;color:#f59e0b">15.9%</span></div>
+      <div class="hbar-track"><div style="width:40%;background:#f59e0b;height:10px;border-radius:3px"></div></div>
+    </div>
+    <div class="hbar-item">
+      <div class="hbar-label"><span>Overall Average</span><span style="font-weight:700;color:#64748b">11.2%</span></div>
+      <div class="hbar-track"><div style="width:28%;background:#94a3b8;height:10px;border-radius:3px"></div></div>
+    </div>
+    <div class="hbar-item">
+      <div class="hbar-label"><span>10+ Year Loyalty (X.8)</span><span style="font-weight:700;color:#1d9e75">6.1%</span></div>
+      <div class="hbar-track"><div style="width:15%;background:#1d9e75;height:10px;border-radius:3px"></div></div>
+    </div>
+    <div class="hbar-item">
+      <div class="hbar-label"><span>Agricultural Vehicle (X.19=4)</span><span style="font-weight:700;color:#1d9e75">~1%</span></div>
+      <div class="hbar-track"><div style="width:3%;background:#1d9e75;height:10px;border-radius:3px"></div></div>
+    </div>
+  </div>
+</div><!-- end main-grid -->
+
+<!-- WIDE ROW: SHAP + Innovations -->
+<div class="wide-row">
+  <div class="wide-inner">
+
+    <!-- SHAP panel -->
+    <div>
+      <div class="sl">SHAP Feature Importance — Top Features Across LC, HALC &amp; CS</div>
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:14px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div>
+            <div style="font-size:11px;font-weight:700;color:#1a2744;margin-bottom:8px">LC Model (Mean |SHAP|)</div>
+            <div class="shap-bar">
+              <div class="shap-row"><span>cancel_ratio</span><span style="color:#e8593c;font-weight:700">0.78</span></div>
+              <div class="shap-track"><div style="width:78%;background:#e8593c;height:11px;border-radius:3px"></div></div>
+            </div>
+            <div class="shap-bar">
+              <div class="shap-row"><span>days_since_renewal</span><span style="color:#e8593c;font-weight:700">0.66</span></div>
+              <div class="shap-track"><div style="width:66%;background:#e8593c;height:11px;border-radius:3px"></div></div>
+            </div>
+            <div class="shap-bar">
+              <div class="shap-row"><span>policy_start_age_yrs</span><span style="color:#f59e0b;font-weight:700">0.64</span></div>
+              <div class="shap-track"><div style="width:64%;background:#f59e0b;height:11px;border-radius:3px"></div></div>
+            </div>
+            <div class="shap-bar">
+              <div class="shap-row"><span>days_to_renewal</span><span style="color:#f59e0b;font-weight:700">0.48</span></div>
+              <div class="shap-track"><div style="width:48%;background:#f59e0b;height:11px;border-radius:3px"></div></div>
+            </div>
+            <div class="shap-bar">
+              <div class="shap-row"><span>net_premium (X.14)</span><span style="color:#94a3b8;font-weight:700">0.30</span></div>
+              <div class="shap-track"><div style="width:30%;background:#94a3b8;height:11px;border-radius:3px"></div></div>
+            </div>
+            <div class="shap-bar">
+              <div class="shap-row"><span>pay_frequency (X.13)</span><span style="color:#94a3b8;font-weight:700">0.23</span></div>
+              <div class="shap-track"><div style="width:23%;background:#94a3b8;height:11px;border-radius:3px"></div></div>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:11px;font-weight:700;color:#1a2744;margin-bottom:8px">HALC Model (Mean |SHAP|)</div>
+            <div class="shap-bar">
+              <div class="shap-row"><span>policy_start_age_yrs</span><span style="color:#f59e0b;font-weight:700">0.91</span></div>
+              <div class="shap-track"><div style="width:91%;background:#f59e0b;height:11px;border-radius:3px"></div></div>
+            </div>
+            <div class="shap-bar">
+              <div class="shap-row"><span>cancel_ratio</span><span style="color:#e8593c;font-weight:700">0.75</span></div>
+              <div class="shap-track"><div style="width:75%;background:#e8593c;height:11px;border-radius:3px"></div></div>
+            </div>
+            <div class="shap-bar">
+              <div class="shap-row"><span>days_since_renewal</span><span style="color:#e8593c;font-weight:700">0.63</span></div>
+              <div class="shap-track"><div style="width:63%;background:#e8593c;height:11px;border-radius:3px"></div></div>
+            </div>
+            <div class="shap-bar">
+              <div class="shap-row"><span>days_to_renewal</span><span style="color:#f59e0b;font-weight:700">0.53</span></div>
+              <div class="shap-track"><div style="width:53%;background:#f59e0b;height:11px;border-radius:3px"></div></div>
+            </div>
+            <div class="shap-bar">
+              <div class="shap-row"><span>net_premium (X.14)</span><span style="color:#94a3b8;font-weight:700">0.36</span></div>
+              <div class="shap-track"><div style="width:36%;background:#94a3b8;height:11px;border-radius:3px"></div></div>
+            </div>
+            <div class="shap-bar">
+              <div class="shap-row"><span>pay_frequency (X.13)</span><span style="color:#94a3b8;font-weight:700">0.25</span></div>
+              <div class="shap-track"><div style="width:25%;background:#94a3b8;height:11px;border-radius:3px"></div></div>
+            </div>
+          </div>
+        </div>
+        <div style="font-size:10px;color:#94a3b8;margin-top:10px;border-top:1px solid #e2e8f0;padding-top:8px">
+          SHAP computed on 2,000-policy sample &nbsp;·&nbsp; 6 of top 8 features overlap across LC, HALC &amp; CS — confirms models capture genuine economic relationships, not overfitting.
+        </div>
+      </div>
+    </div>
+
+    <!-- Innovations + Conclusion -->
+    <div>
+      <div class="sl">Innovations &amp; Methodology</div>
+      <div class="innov-grid">
+        <div class="innov-item">
+          <div class="innov-title">📐 Direct HALC Modeling</div>
+          <div class="innov-body">HALC modeled as independent Tweedie response — not LC × X̂.18. Avoids compounded prediction error; X.18 is unavailable at test time.</div>
+        </div>
+        <div class="innov-item">
+          <div class="innov-title">⚡ Tweedie Power Tuning</div>
+          <div class="innov-body">Power p ∈ {1.1, 1.2, 1.5, 1.8, 1.9} tuned per model and target. Optimal p varies (LC=1.5, GLM=1.1) — confirms p must be a hyperparameter, not a fixed assumption.</div>
+        </div>
+        <div class="innov-item">
+          <div class="innov-title">🔗 Cross-Model Consistency</div>
+          <div class="innov-body">Post-processing rule: CS prob &lt; 0.5 forces LC = HALC = 0. Reduces MSE for the 88.85% zero-claim majority; mirrors actuarial two-part model convention.</div>
+        </div>
+        <div class="innov-item">
+          <div class="innov-title">🛠️ Behavioral Feature Engineering</div>
+          <div class="innov-body">cancel_ratio, days_since/to_renewal, policy tenure ranked highest in SHAP across all three models — feature engineering was the single largest performance driver.</div>
+        </div>
+      </div>
+      <div class="conclusion">
+        <strong>Conclusion:</strong> Three production-ready models delivered — LightGBM Tweedie for LC (MSE 254K) &amp; HALC (MSE 997K), XGBoost Classifier for CS (AUC 0.857). The dominant driver of insurance risk is customer <em>behavior</em>, not demographics: cancellation history, policy tenure, and renewal timing consistently outrank age, vehicle type, and pricing. Actionable for retention pricing, renewal strategy, and underwriting policy.
+      </div>
+    </div>
+
+  </div>
+</div><!-- end wide-row -->
+
+<!-- FOOTER -->
+<div class="footer">
+  <div>DSO 530 · Group 5 · Insurance Loss Analytics · Spring 2026 · USC Marshall School of Business</div>
+  <div>LightGBM Tweedie &nbsp;·&nbsp; XGBoost Classifier &nbsp;·&nbsp; SHAP Interpretability &nbsp;·&nbsp; 3-Fold Cross-Validation</div>
+</div>
+
+</div><!-- end poster -->
+</body>
+</html>
