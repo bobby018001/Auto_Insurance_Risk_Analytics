@@ -1,0 +1,18 @@
+.ipynb_checkpoints/
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+.DS_Store
+__MACOSX/
+
+# Course data and generated artifacts are intentionally not public
+data/raw/
+data/processed/
+models/
+outputs/
+*.pkl
+*.joblib
+*_prediction.csv
+*_predictions.csv
